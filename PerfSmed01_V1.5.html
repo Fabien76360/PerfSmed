@@ -233,6 +233,21 @@
     .field input[type="time"] {
       font-variant-numeric: tabular-nums;
     }
+    .field.time .time-inline {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+    .field.time .time-inline #ipc-time {
+      width: 100%;
+    }
+    .field.time .time-inline #ipc-now-button {
+      height: 44px;
+      min-height: 44px;
+      white-space: nowrap;
+      padding: 0 12px;
+    }
 
     .field.wide,
     .field.date,
@@ -1883,8 +1898,10 @@
         </div>
         <div class="field time">
           <label for="ipc-time">Heure Dernière caisse</label>
-          <input type="time" id="ipc-time" step="60">
-          <button class="reset-button" id="ipc-now-button" type="button">Maintenant</button>
+          <div class="time-inline">
+            <input type="time" id="ipc-time" step="60">
+            <button class="reset-button" id="ipc-now-button" type="button">Maintenant</button>
+          </div>
         </div>
         <div class="field actions-field">
           <label>&nbsp;</label>
