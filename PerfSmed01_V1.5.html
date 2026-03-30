@@ -162,8 +162,8 @@
     .id-block {
       display: grid;
       gap: 12px;
-      grid-template-columns: minmax(180px, 1.1fr) minmax(220px, 1.7fr) minmax(180px, 1.2fr) minmax(160px, 1fr) minmax(130px, 0.8fr) minmax(150px, 0.7fr);
-      grid-template-areas: "ligne po product ipc-date ipc-time actions";
+      grid-template-columns: minmax(180px, 1.1fr) minmax(220px, 1.7fr) minmax(180px, 1.2fr) minmax(160px, 1fr) minmax(150px, 0.9fr) minmax(140px, 0.8fr) minmax(150px, 0.7fr);
+      grid-template-areas: "ligne po product ipc-date ipc-time ipc-now actions";
       margin-bottom: 16px;
       max-width: 1280px;
     }
@@ -179,7 +179,7 @@
           "ligne po"
           "product product"
           "ipc-date ipc-time"
-          "actions actions";
+          "ipc-now actions";
       }
     }
 
@@ -201,6 +201,9 @@
 
     .field.time {
       grid-area: ipc-time;
+    }
+    .field.now {
+      grid-area: ipc-now;
     }
 
     .field.actions-field {
@@ -233,16 +236,7 @@
     .field input[type="time"] {
       font-variant-numeric: tabular-nums;
     }
-    .field.time .time-inline {
-      display: grid;
-      grid-template-columns: minmax(120px, 1fr) auto;
-      gap: 8px;
-      align-items: center;
-    }
-    .field.time .time-inline #ipc-time {
-      width: 100%;
-    }
-    .field.time .time-inline #ipc-now-button {
+    .field.now #ipc-now-button {
       height: 44px;
       min-height: 44px;
       white-space: nowrap;
@@ -252,6 +246,7 @@
     .field.wide,
     .field.date,
     .field.time,
+    .field.now,
     .field.actions-field {
       width: 100%;
     }
@@ -1898,10 +1893,11 @@
         </div>
         <div class="field time">
           <label for="ipc-time">Heure Dernière caisse</label>
-          <div class="time-inline">
-            <input type="time" id="ipc-time" step="60">
-            <button class="reset-button" id="ipc-now-button" type="button">Maintenant</button>
-          </div>
+          <input type="time" id="ipc-time" step="60">
+        </div>
+        <div class="field now">
+          <label>&nbsp;</label>
+          <button class="reset-button" id="ipc-now-button" type="button">Maintenant</button>
         </div>
         <div class="field actions-field">
           <label>&nbsp;</label>
