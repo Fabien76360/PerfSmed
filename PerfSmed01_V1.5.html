@@ -162,8 +162,8 @@
     .id-block {
       display: grid;
       gap: 12px;
-      grid-template-columns: minmax(180px, 1.1fr) minmax(220px, 1.7fr) minmax(180px, 1.2fr) minmax(160px, 1fr) minmax(130px, 0.8fr) minmax(150px, 0.7fr);
-      grid-template-areas: "ligne po product ipc-date ipc-time actions";
+      grid-template-columns: minmax(180px, 1.1fr) minmax(220px, 1.7fr) minmax(180px, 1.2fr) minmax(160px, 1fr) minmax(150px, 0.9fr) minmax(140px, 0.8fr) minmax(150px, 0.7fr);
+      grid-template-areas: "ligne po product ipc-date ipc-time ipc-now actions";
       margin-bottom: 16px;
       max-width: 1280px;
     }
@@ -179,7 +179,7 @@
           "ligne po"
           "product product"
           "ipc-date ipc-time"
-          "actions actions";
+          "ipc-now actions";
       }
     }
 
@@ -201,6 +201,9 @@
 
     .field.time {
       grid-area: ipc-time;
+    }
+    .field.now {
+      grid-area: ipc-now;
     }
 
     .field.actions-field {
@@ -233,10 +236,21 @@
     .field input[type="time"] {
       font-variant-numeric: tabular-nums;
     }
+    .field.now #ipc-now-button {
+      height: 44px;
+      min-height: 44px;
+      white-space: nowrap;
+      padding: 0 12px;
+    }
+    .field.now #ipc-now-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
 
     .field.wide,
     .field.date,
     .field.time,
+    .field.now,
     .field.actions-field {
       width: 100%;
     }
@@ -1878,12 +1892,16 @@
         
         
 <div class="field date">
-          <label for="ipc-date">Date IPC</label>
+          <label for="ipc-date">Date Dernière caisse</label>
           <input type="date" id="ipc-date">
         </div>
         <div class="field time">
-          <label for="ipc-time">Heure IPC</label>
+          <label for="ipc-time">Heure Dernière caisse</label>
           <input type="time" id="ipc-time" step="60">
+        </div>
+        <div class="field now">
+          <label>&nbsp;</label>
+          <button class="reset-button" id="ipc-now-button" type="button">Maintenant</button>
         </div>
         <div class="field actions-field">
           <label>&nbsp;</label>
@@ -2415,6 +2433,7 @@
     const headerLigne = document.querySelector("#header-ligne");
     const ipcDate = document.querySelector("#ipc-date");
     const ipcTime = document.querySelector("#ipc-time");
+    const ipcNowButton = document.querySelector("#ipc-now-button");
     const chronoBar = document.querySelector("#chrono-bar");
     const chronoTime = document.querySelector("#chrono-time");
     const chronoTarget = document.querySelector("#chrono-target");
@@ -2478,6 +2497,36 @@
     const analysisPrintButton = document.querySelector("#analysis-print");
 
     const tabButtons = document.querySelectorAll(".tabbar-button");
+    const areExternalTasksDoneForNowButton = () => {
+      if (!Array.isArray(operators) || operators.length === 0) {
+        const hasExternalSteps = Array.isArray(settings?.standardSteps)
+          && settings.standardSteps.some((step) => step?.type === "external");
+        return !hasExternalSteps;
+      }
+      const externalSteps = operators.flatMap((operator) => (Array.isArray(operator.steps) ? operator.steps : []))
+        .filter((step) => step?.type === "external");
+      if (externalSteps.length === 0) {
+        return true;
+      }
+      return externalSteps.every((step) => step && step.status === "done");
+    };
+    const syncIpcNowButtonState = () => {
+      if (!ipcNowButton) {
+        return;
+      }
+      if (ipcNowButton.hidden) {
+        ipcNowButton.disabled = true;
+        return;
+      }
+      ipcNowButton.disabled = !areExternalTasksDoneForNowButton();
+    };
+    const setIpcNowButtonVisibility = (isVisible) => {
+      if (!ipcNowButton) {
+        return;
+      }
+      ipcNowButton.hidden = !isVisible;
+      syncIpcNowButtonState();
+    };
 
     const setActiveTab = (tab) => {
       const pages = document.querySelectorAll(".page");
@@ -3028,6 +3077,7 @@ html += `
         const key = probe ? `${probe.dataset.op}|${probe.dataset.stepIndex}` : `idx|${i}`;
         if (scrollMap.has(key)) el.scrollTop = scrollMap.get(key);
       });
+      syncIpcNowButtonState();
     };
 
     resetOperators();
@@ -3422,6 +3472,7 @@ html += `
       if (!newIsSmedStarted) {
         isSmedFinished = false;
         firstIpcTimestamp = null;
+        setIpcNowButtonVisibility(true);
       }
       if (paramTabButton) {
         paramTabButton.disabled = isSmedStarted;
@@ -3737,6 +3788,20 @@ html += `
     if (ipcDate && ipcTime) {
       ipcDate.addEventListener("input", updateSmedStarted);
       ipcTime.addEventListener("input", updateSmedStarted);
+    }
+    if (ipcNowButton && ipcDate && ipcTime) {
+      ipcNowButton.addEventListener("click", () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        ipcDate.value = `${year}-${month}-${day}`;
+        ipcTime.value = `${hours}:${minutes}`;
+        setIpcNowButtonVisibility(false);
+        updateSmedStarted();
+      });
     }
 
     if (settingsApply) {
@@ -4294,6 +4359,7 @@ html += `
         if (ipcTime) {
           ipcTime.value = "";
         }
+        setIpcNowButtonVisibility(true);
         const ligneInput = document.querySelector("#ligne-input");
         const poInput = document.querySelector("#po-input");
         if (ligneInput) {
