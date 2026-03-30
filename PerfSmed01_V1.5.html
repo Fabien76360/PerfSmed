@@ -1884,6 +1884,7 @@
         <div class="field time">
           <label for="ipc-time">Heure Dernière caisse</label>
           <input type="time" id="ipc-time" step="60">
+          <button class="reset-button" id="ipc-now-button" type="button">Maintenant</button>
         </div>
         <div class="field actions-field">
           <label>&nbsp;</label>
@@ -2415,6 +2416,7 @@
     const headerLigne = document.querySelector("#header-ligne");
     const ipcDate = document.querySelector("#ipc-date");
     const ipcTime = document.querySelector("#ipc-time");
+    const ipcNowButton = document.querySelector("#ipc-now-button");
     const chronoBar = document.querySelector("#chrono-bar");
     const chronoTime = document.querySelector("#chrono-time");
     const chronoTarget = document.querySelector("#chrono-target");
@@ -3737,6 +3739,19 @@ html += `
     if (ipcDate && ipcTime) {
       ipcDate.addEventListener("input", updateSmedStarted);
       ipcTime.addEventListener("input", updateSmedStarted);
+    }
+    if (ipcNowButton && ipcDate && ipcTime) {
+      ipcNowButton.addEventListener("click", () => {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, "0");
+        const day = String(now.getDate()).padStart(2, "0");
+        const hours = String(now.getHours()).padStart(2, "0");
+        const minutes = String(now.getMinutes()).padStart(2, "0");
+        ipcDate.value = `${year}-${month}-${day}`;
+        ipcTime.value = `${hours}:${minutes}`;
+        updateSmedStarted();
+      });
     }
 
     if (settingsApply) {
