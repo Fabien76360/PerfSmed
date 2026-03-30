@@ -242,6 +242,10 @@
       white-space: nowrap;
       padding: 0 12px;
     }
+    .field.now #ipc-now-button:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+    }
 
     .field.wide,
     .field.date,
@@ -2493,12 +2497,35 @@
     const analysisPrintButton = document.querySelector("#analysis-print");
 
     const tabButtons = document.querySelectorAll(".tabbar-button");
+    const areExternalTasksDoneForNowButton = () => {
+      if (!Array.isArray(operators) || operators.length === 0) {
+        const hasExternalSteps = Array.isArray(settings?.standardSteps)
+          && settings.standardSteps.some((step) => step?.type === "external");
+        return !hasExternalSteps;
+      }
+      const externalSteps = operators.flatMap((operator) => (Array.isArray(operator.steps) ? operator.steps : []))
+        .filter((step) => step?.type === "external");
+      if (externalSteps.length === 0) {
+        return true;
+      }
+      return externalSteps.every((step) => step && step.status === "done");
+    };
+    const syncIpcNowButtonState = () => {
+      if (!ipcNowButton) {
+        return;
+      }
+      if (ipcNowButton.hidden) {
+        ipcNowButton.disabled = true;
+        return;
+      }
+      ipcNowButton.disabled = !areExternalTasksDoneForNowButton();
+    };
     const setIpcNowButtonVisibility = (isVisible) => {
       if (!ipcNowButton) {
         return;
       }
       ipcNowButton.hidden = !isVisible;
-      ipcNowButton.disabled = !isVisible;
+      syncIpcNowButtonState();
     };
 
     const setActiveTab = (tab) => {
@@ -3050,6 +3077,7 @@ html += `
         const key = probe ? `${probe.dataset.op}|${probe.dataset.stepIndex}` : `idx|${i}`;
         if (scrollMap.has(key)) el.scrollTop = scrollMap.get(key);
       });
+      syncIpcNowButtonState();
     };
 
     resetOperators();
