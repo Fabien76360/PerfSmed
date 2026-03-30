@@ -2497,6 +2497,13 @@
     const analysisPrintButton = document.querySelector("#analysis-print");
 
     const tabButtons = document.querySelectorAll(".tabbar-button");
+    const setIpcNowButtonVisibility = (isVisible) => {
+      if (!ipcNowButton) {
+        return;
+      }
+      ipcNowButton.hidden = !isVisible;
+      ipcNowButton.disabled = !isVisible;
+    };
 
     const setActiveTab = (tab) => {
       const pages = document.querySelectorAll(".page");
@@ -3441,6 +3448,7 @@ html += `
       if (!newIsSmedStarted) {
         isSmedFinished = false;
         firstIpcTimestamp = null;
+        setIpcNowButtonVisibility(true);
       }
       if (paramTabButton) {
         paramTabButton.disabled = isSmedStarted;
@@ -3767,6 +3775,7 @@ html += `
         const minutes = String(now.getMinutes()).padStart(2, "0");
         ipcDate.value = `${year}-${month}-${day}`;
         ipcTime.value = `${hours}:${minutes}`;
+        setIpcNowButtonVisibility(false);
         updateSmedStarted();
       });
     }
@@ -4326,6 +4335,7 @@ html += `
         if (ipcTime) {
           ipcTime.value = "";
         }
+        setIpcNowButtonVisibility(true);
         const ligneInput = document.querySelector("#ligne-input");
         const poInput = document.querySelector("#po-input");
         if (ligneInput) {
